@@ -7,13 +7,25 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-enabled-themes (quote (tango-dark)))
- '(package-selected-packages (quote (magit company-web tide indium))))
+ '(package-selected-packages
+   (quote
+    (ag projectile slack use-package magit company-web tide indium))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+;;AG
+(require 'ag)
+
+;;Projectile Setup
+(projectile-mode +1)
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+
+;;Jira Org Mode
+(setq jiralib-url "https://jira.corp.adobe.com/")
 
 ;; Tide Setup
 (defun setup-tide-mode ()
@@ -36,6 +48,16 @@
           (lambda ()
             (when (string-equal "tsx" (file-name-extension buffer-file-name))
               (setup-tide-mode))))
+
+;; Javascript mode
+(require 'js2-mode)
+(require 'tide)
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+(add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
+(add-hook 'js2-mode-hook #'setup-tide-mode)
+;; configure javascript-tide checker to run after your default javascript checker
+(flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append)
+
 ;; enable typescript-tslint checker
 (flycheck-add-mode 'typescript-tslint 'web-mode)
 
@@ -49,8 +71,8 @@
 
 ;; formatting all views
 ;;(display-line-numbers relative)
+(load-theme 'tango-dark)
 (set-foreground-color "black")
 (set-background-color "white")
-(set-default-font "Fira Code")
-(set-face-attribute 'default nil :height 140)
-(load-theme 'tango-dark)
+(set-face-attribute 'default nil :family "Fira Code")
+(set-face-attribute 'default nil :height 160)
