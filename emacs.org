@@ -32,6 +32,18 @@
   (require 'ag)
 #+END_SRC
 
+** Setup Tide Mode
+#+BEGIN_SRC emacs-lisp
+  (defun setup-tide-mode ()
+    (interactive)
+    (tide-setup)
+    (flycheck-mode +1)
+    (setq flycheck-check-syntax-automatically '(save mode-enabled))
+    (eldoc-mode +1)
+    (tide-hl-identifier-mode +1)
+    (company-mode +1))
+#+END_SRC
+
 ** Typescript
 #+BEGIN_SRC emacs-lisp
   (setq exec-path (append exec-path '("/Users/smorrice/.nvs/default/bin/")))
@@ -99,6 +111,13 @@
       ))
 #+END_SRC
 
+* Atomic Chrome
+#+BEGIN_SRC emacs-lisp
+(require 'atomic-chrome)
+;;(require 'ox-jira)
+;;(setq atomic-chrome-url-major-mode-alist (("wiki\.corp\.adobe\.com" . ox-jira)))
+(atomic-chrome-start-server)
+#+END_SRC
 * Look and Feel
 #+BEGIN_SRC emacs-lisp
 ;; formatting all views
