@@ -1,4 +1,5 @@
 * Base
+** Ace of Base
 #+BEGIN_SRC emacs-lisp
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
@@ -11,22 +12,79 @@
  '(custom-enabled-themes (quote (tango-dark)))
  '(package-selected-packages
    (quote
-    (ag projectile slack use-package magit company-web tide indium))))
+    (ag projectile org-projectile slack use-package magit company-web tide indium))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
 #+END_SRC
-** Nuke All Buffers
+** Custom Functions
 #+BEGIN_SRC emacs-lisp
   (defun nuke-all-buffers ()
     (interactive)
     (mapcar 'kill-buffer (buffer-list))
     (delete-other-windows))
 
+  (defun open-assets-site ()
+    (interactive)
+    (browse-url-default-macosx-browser "https://localhost.adobecc.com/projects?flags=cc_projects"))
+
   (global-set-key (kbd "C-x K") 'nuke-all-buffers)
+#+END_SRC
+* Org Projectile
+#+BEGIN_SRC emacs-lisp
+(use-package org-projectile
+  :bind (("C-c n p" . org-projectile-project-todo-completing-read)
+         ("C-c c" . org-capture))
+  :config
+  (progn
+    (org-projectile-per-project)
+    (setq org-projectile-per-project-filepath "project_todos.org")
+    (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
+    (push (org-projectile-project-todo-entry) org-capture-templates))
+  :ensure t)
+#+END_SRC
+* Slack
+#+BEGIN_SRC emacs-lisp
+  (require 'auth-source)
+  (use-package slack
+    :commands (slack-start)
+    :config
+    (slack-register-team
+     :name "creativecloud"
+     :default t
+     :token (auth-source-pick-first-password :host "creativecloud.slack.com"))
+    (setq slack-completing-read-function #'ido-completing-read)
+    (setq slack-buffer-function #'switch-to-buffer)
+    (setq slack-prefer-current-team t)
+    (setq slack-display-team-name nil)
+    (define-key ctl-x-map "j" #'slack-select-rooms)
+    (define-key slack-mode-map (kbd "M-o") (kbd "<backtab> RET M->"))
+    (define-key slack-mode-map "@" 
+      (defun endless/slack-message-embed-mention ()
+	(interactive)
+	(call-interactively #'slack-message-embed-mention)
+	(insert " ")))
+    (define-key slack-mode-map (kbd "C-c C-d") #'slack-message-delete)
+    (define-key slack-mode-map (kbd "C-c C-e") #'slack-message-edit)
+    (define-key slack-mode-map (kbd "C-c C-k") #'slack-channel-leave)
+    (defun slack-user-status (_id _team) "")
+    (setq slack-message-notification-title-format-function
+      (lambda (_team room threadp)
+	(concat (if threadp "Thread in #%s") room)))
+    (defun endless/-cleanup-room-name (room-name)
+      "Make group-chat names a bit more human-readable."
+      (replace-regexp-in-string
+	"--" " "
+	(replace-regexp-in-string "#mpdm-" "" room-name)))
+    (setq slack-message-im-notification-title-format-function
+      (lambda (_team room threadp)
+	(concat (if threadp "Thread in %s") 
+	  (endless/-cleanup-room-name room))))
+  )
 #+END_SRC
 * Projectile
 #+BEGIN_SRC emacs-lisp
@@ -61,6 +119,7 @@
     :config
     (progn
       (company-mode +1)
+      (setq tide-tsserver-executable "/Users/smorrice/.nvs/default/bin/tsserver")
       ;; aligns annotation to the right hand side
       (setq company-tooltip-align-annotations t)
       (add-hook 'typescript-mode-hook #'setup-tide-mode)

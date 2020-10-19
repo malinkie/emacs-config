@@ -18,7 +18,7 @@
  '(custom-enabled-themes (quote (tango-dark)))
  '(package-selected-packages
    (quote
-    (atomic-chrome ag projectile slack use-package magit company-web tide indium))))
+    (tide org-projectile atomic-chrome ag projectile slack use-package magit company-web indium))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
