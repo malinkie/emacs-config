@@ -39,6 +39,24 @@
 
   (global-set-key (kbd "C-~") 'mal/load-config)
 #+END_SRC
+** Flycheck
+#+BEGIN_SRC emacs-lisp
+(use-package flycheck
+:ensure t
+:config
+  (global-flycheck-mode))
+#+END_SRC
+** Company
+#+BEGIN_SRC emacs-lisp
+(use-package company
+:config 
+  (setq company-idle-delay 0.3)
+  (global-company-mode t))
+#+END_SRC
+** ag
+#+BEGIN_SRC emacs-lisp
+(use-package ag)
+#+END_SRC
 * Org Projectile
 #+BEGIN_SRC emacs-lisp
 (use-package org-projectile
@@ -111,12 +129,6 @@
   (add-to-list 'auto-mode-alist '("\\.html\\'" . web-mode))
 #+END_SRC
 * Javascript
-** Requires
-#+BEGIN_SRC emacs-lisp
-  (require 'flycheck)
-  (require 'ag)
-#+END_SRC
-
 ** Setup Tide Mode
 #+BEGIN_SRC emacs-lisp
   (defun setup-tide-mode ()
@@ -134,15 +146,13 @@
   (setq exec-path (append exec-path '("/Users/smorrice/.nvs/default/bin/")))
   (use-package tide
     :ensure t
+    :bind ("M-/" . 'tide-references)
+    :mode ("\\.ts\\'" . typescript-mode)
+    :hook (typescript-mode . #'setup-tide-mode)
     :config
-    (progn
       (company-mode +1)
       (setq tide-tsserver-executable "/Users/smorrice/.nvs/default/bin/tsserver")
-      ;; aligns annotation to the right hand side
-      (setq company-tooltip-align-annotations t)
-      (add-hook 'typescript-mode-hook #'setup-tide-mode)
-      (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
-    ))
+      (setq company-tooltip-align-annotations t))
 #+END_SRC
 
 ** Javascript
