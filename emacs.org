@@ -42,9 +42,9 @@
 ** Flycheck
 #+BEGIN_SRC emacs-lisp
 (use-package flycheck
-:ensure t
-:config
-  (global-flycheck-mode))
+    :ensure t
+    :config
+        (global-flycheck-mode))
 #+END_SRC
 ** Company
 #+BEGIN_SRC emacs-lisp
@@ -160,14 +160,15 @@
 #+BEGIN_SRC emacs-lisp
   (use-package js2-mode
     :ensure t
+    :after (flycheck web-mode)
     :mode "\\.js\\'"
-    :interpereter "node"
+    :interpreter "node"
+    :hook (#'setup-tide-mode)
     :config
-      (add-hook 'js2-mode-hook #'setup-tide-mode)
-      ;; configure javascript-tide checker to run after your default javascript checker
       (setq js2-basic-offset 2)
-      (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append)
-      (add-to-list 'interpreter-mode-alist '("node" . js2-mode))
+      (flycheck-add-mode 'javascript-eslint 'web-mode)
+      (flycheck-add-next-checker 'javascript-eslint 'jsx-tide 'append)
+      (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append))
 #+END_SRC
 ** JSON
 #+BEGIN_SRC emacs-lisp
