@@ -144,15 +144,16 @@
 
 ** Typescript
 #+BEGIN_SRC emacs-lisp
-  (setq exec-path (append exec-path '("/Users/smorrice/.nvs/default/bin/")))
   (use-package tide
     :ensure t
+    :after (typescript-mode company flycheck)
     :bind ("M-/" . 'tide-references)
-    :mode ("\\.ts\\'" . typescript-mode)
-    :hook (typescript-mode . #'setup-tide-mode)
+    :hook ((typescript-mode . tide-setup)
+	(typescript-mode . tide-hl-identifier-mode)
+	(before-save . tide-format-before-save))
     :config
       (company-mode +1)
-      (setq tide-tsserver-executable "/Users/smorrice/.nvs/default/bin/tsserver")
+      
       (setq company-tooltip-align-annotations t))
 #+END_SRC
 
@@ -209,6 +210,29 @@
       ))
 #+END_SRC
 
+* C++
+#+BEGIN_SRC emacs-lisp
+#+END_SRC
+* YAML
+#+BEGIN_SRC emacs-lisp
+(use-package yaml-mode)
+#+END_SRC
+* GO
+#+BEGIN_SRC emacs-lisp
+  (use-package go-mode)
+#+END_SRC
+* GraphQL
+#+BEGIN_SRC emacs-lisp
+(use-package graphql-mode
+  :mode "\\.graphqls\\'"
+)
+#+END_SRC
+* Groovy
+#+BEGIN_SRC emacs-lisp
+  (use-package groovy-mode
+       :mode "\\Jenkinsfile\\'"
+       :hook 'lsp)
+#+END_SRC
 * Atomic Chrome
 #+BEGIN_SRC emacs-lisp
 (require 'atomic-chrome)
