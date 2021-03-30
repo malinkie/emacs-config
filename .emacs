@@ -12,7 +12,7 @@
  ;; If there is more than one, they won't work right.
  '(custom-enabled-themes '(tango-dark))
  '(package-selected-packages
-   '(groovy-mode graphql-mode yaml-mode go-mode atomic-chrome ag projectile org-projectile slack use-package magit company-web tide indium web-mode dockerfile-mode)))
+   '(org-babel-eval-in-repl groovy-mode graphql-mode yaml-mode go-mode atomic-chrome ag projectile org-projectile slack use-package magit company-web tide indium web-mode dockerfile-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
