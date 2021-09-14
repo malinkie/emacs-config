@@ -19,6 +19,16 @@
  ;; If there is more than one, they won't work right.
  )
 
+(delete-selection-mode t)
+(setq gc-cons-threshold 100000000)
+(setq read-process-output-max (* 1024 1024))
+(setq make-backup-files nil)
+(setq make-lockfiles nil)
+(setq tab-width 4)
+(setq indent-tabs-mode nil)
+(global-display-line-numbers-mode)
+
+
 #+END_SRC
 ** Custom Functions
 #+BEGIN_SRC emacs-lisp
@@ -27,10 +37,6 @@
     (mapcar 'kill-buffer (buffer-list))
     (delete-other-windows))
 
-  (defun open-assets-site ()
-    (interactive)
-    (browse-url-default-macosx-browser "https://localhost.adobecc.com/projects?flags=cc_projects,cc_projects_upload"))
-
   (global-set-key (kbd "C-x K") 'nuke-all-buffers)
 
   (defun mal/load-config ()
@@ -38,6 +44,12 @@
     (find-file config-file))
 
   (global-set-key (kbd "C-~") 'mal/load-config)
+#+END_SRC
+** IDO
+#+BEGIN_SRC emacs-lisp
+(setq ido-enable-flex-matching t)
+(setq ido-everywhere t)
+(ido-mode 1)
 #+END_SRC
 ** Flycheck
 #+BEGIN_SRC emacs-lisp
@@ -50,12 +62,61 @@
 #+BEGIN_SRC emacs-lisp
 (use-package company
 :config 
-  (setq company-idle-delay 0.3)
+  (setq company-idle-delay 0.0)
   (global-company-mode t))
 #+END_SRC
 ** ag
 #+BEGIN_SRC emacs-lisp
 (use-package ag)
+(use-package helm-ag)
+#+END_SRC
+** lsp
+#+BEGIN_SRC emacs-lisp
+(use-package lsp-treemacs
+:ensure t)
+
+(use-package helm-lsp
+:ensure t)
+
+(use-package typescript-mode
+:ensure t)
+
+(use-package js2-mode
+:ensure t)
+
+(use-package rjsx-mode
+:ensure t)
+
+(use-package json-mode
+    :ensure t)
+
+(use-package web-mode
+    :ensure t
+    :mode (
+        ("\\.js\\'" . web-mode)
+        ("\\.mjs\\'" . web-mode)
+	("\\.jsx\\'" . web-mode)
+	("\\.ts\\'" . web-mode)
+	("\\.tsx\\'" . web-mode)
+	("\\.html\\'" . web-mode))
+    :commands web-mode)
+
+(use-package lsp-mode
+    :ensure t
+    :init (
+        setq lsp-clients-typescript-tls-path nil)
+    :hook (
+        (web-mode . lsp-deferred)
+	(c-mode . lsp-deferred)
+	(c++-mode . lsp-deferred))
+    :bind (
+        ("M-/" . lsp-find-references))
+    :commands lsp-deferred)
+
+(use-package lsp-ui
+:ensure t
+:commands lsp-ui-mode)
+
 #+END_SRC
 * Org Projectile
 #+BEGIN_SRC emacs-lisp
@@ -75,176 +136,14 @@
     (push (org-projectile-project-todo-entry) org-capture-templates))
   :ensure t)
 #+END_SRC
-* Slack
-#+BEGIN_SRC emacs-lisp
-  (require 'auth-source)
-  (use-package slack
-    :commands (slack-start)
-    :config
-    (slack-register-team
-     :name "creativecloud"
-     :default t
-     :token (auth-source-pick-first-password :host "creativecloud.slack.com"))
-    (setq slack-completing-read-function #'ido-completing-read)
-    (setq slack-buffer-function #'switch-to-buffer)
-    (setq slack-prefer-current-team t)
-    (setq slack-display-team-name nil)
-    (define-key ctl-x-map "j" #'slack-select-rooms)
-    (define-key slack-mode-map (kbd "M-o") (kbd "<backtab> RET M->"))
-    (define-key slack-mode-map "@" 
-      (defun endless/slack-message-embed-mention ()
-	(interactive)
-	(call-interactively #'slack-message-embed-mention)
-	(insert " ")))
-    (define-key slack-mode-map (kbd "C-c C-d") #'slack-message-delete)
-    (define-key slack-mode-map (kbd "C-c C-e") #'slack-message-edit)
-    (define-key slack-mode-map (kbd "C-c C-k") #'slack-channel-leave)
-    (defun slack-user-status (_id _team) "")
-    (setq slack-message-notification-title-format-function
-      (lambda (_team room threadp)
-	(concat (if threadp "Thread in #%s") room)))
-    (defun endless/-cleanup-room-name (room-name)
-      "Make group-chat names a bit more human-readable."
-      (replace-regexp-in-string
-	"--" " "
-	(replace-regexp-in-string "#mpdm-" "" room-name)))
-    (setq slack-message-im-notification-title-format-function
-      (lambda (_team room threadp)
-	(concat (if threadp "Thread in %s") 
-	  (endless/-cleanup-room-name room))))
-  )
-#+END_SRC
 * Projectile
 #+BEGIN_SRC emacs-lisp
 ;;Projectile Setup
+(use-package helm-projectile :ensure t)
 (projectile-mode +1)
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-#+END_SRC
-* Web
-#+BEGIN_SRC emacs-lisp
-(use-package web-mode
-  :mode 
-    ("\\.phtml\\'"
-    "\\.tpl\\.php\\'"
-    "\\.[agj]sp\\'"
-    "\\.as[cp]x\\'"
-    "\\.erb\\'"
-    "\\.hbs\\'"
-    "\\.mustache\\'"
-    "\\.djhtml\\'"
-    "\\.html\\'"))
-#+END_SRC
-* Javascript
-** Setup Tide Mode
-#+BEGIN_SRC emacs-lisp
-  (defun setup-tide-mode ()
-    (interactive)
-    (tide-setup)
-    (flycheck-mode +1)
-    (setq flycheck-check-syntax-automatically '(save mode-enabled))
-    (eldoc-mode +1)
-    (tide-hl-identifier-mode +1)
-    (company-mode +1))
-#+END_SRC
-
-** Typescript
-#+BEGIN_SRC emacs-lisp
-  (use-package tide
-    :ensure t
-    :after (typescript-mode company flycheck)
-    :bind ("M-/" . 'tide-references)
-    :hook ((typescript-mode . tide-setup)
-	(typescript-mode . tide-hl-identifier-mode)
-	(before-save . tide-format-before-save))
-    :config
-      (company-mode +1)
-      
-      (setq company-tooltip-align-annotations t))
-#+END_SRC
-
-** Javascript
-#+BEGIN_SRC emacs-lisp
-  (use-package js2-mode
-    :ensure t
-    :after (flycheck web-mode)
-    :mode "\\.js\\'"
-    :mode "\\.mjs\\'"
-    :interpreter "node"
-    :hook (#'setup-tide-mode)
-    :config
-      (setq js2-basic-offset 2)
-      (flycheck-add-mode 'javascript-eslint 'web-mode)
-      (flycheck-add-next-checker 'javascript-eslint 'jsx-tide 'append)
-      (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append))
-#+END_SRC
-** JSON
-#+BEGIN_SRC emacs-lisp
-  (use-package json-mode
-    :ensure t
-    :config
-    (progn
-      (flycheck-add-mode 'json-jsonlint 'json-mode)
-      (add-hook 'json-mode-hook 'flycheck-mode)
-      (setq js-indent-level 2)
-      (add-to-list 'auto-mode-alist '("\\.json" . json-mode))))
-#+END_SRC
-
-** JSX & TSX
-#+BEGIN_SRC emacs-lisp
-  (use-package web-mode
-    :ensure t
-    :config
-    (progn
-      (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
-      (add-to-list 'auto-mode-alist '("\\.js" . web-mode))
-      ;; this magic incantation fixes highlighting of jsx syntax in .js files
-      (setq web-mode-content-types-alist
-	    '(("jsx" . "\\.js[x]?\\'")))
-      (add-hook 'web-mode-hook
-		(lambda ()
-		  (setq web-mode-code-indent-offset 4)
-		  (when (string-equal "tsx" (file-name-extension buffer-file-name))
-		    (setup-tide-mode))
-		  (when (string-equal "jsx" (file-name-extension buffer-file-name))
-		    (setup-tide-mode))
-		  (when (string-equal "js" (file-name-extension buffer-file-name))
-		    (progn
-		      (setup-tide-mode)
-		      (with-eval-after-load 'flycheck
-			(flycheck-add-mode 'typescript-tslint 'web-mode)
-			(flycheck-add-mode 'javascript-tide 'web-mode))))))
-      ))
-#+END_SRC
-
-* C++
-#+BEGIN_SRC emacs-lisp
-#+END_SRC
-* YAML
-#+BEGIN_SRC emacs-lisp
-(use-package yaml-mode)
-#+END_SRC
-* GO
-#+BEGIN_SRC emacs-lisp
-  (use-package go-mode)
-#+END_SRC
-* GraphQL
-#+BEGIN_SRC emacs-lisp
-(use-package graphql-mode
-  :mode "\\.graphqls\\'"
-)
-#+END_SRC
-* Groovy
-#+BEGIN_SRC emacs-lisp
-  (use-package groovy-mode
-       :mode "\\Jenkinsfile\\'"
-       :hook 'lsp)
-#+END_SRC
-* Atomic Chrome
-#+BEGIN_SRC emacs-lisp
-(require 'atomic-chrome)
-;;(require 'ox-jira)
-;;(setq atomic-chrome-url-major-mode-alist (("wiki\.corp\.adobe\.com" . ox-jira)))
-(atomic-chrome-start-server)
+(setq projectile-completion-system 'helm)
+(helm-projectile-on)
 #+END_SRC
 * Look and Feel
 #+BEGIN_SRC emacs-lisp
