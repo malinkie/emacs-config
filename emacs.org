@@ -81,6 +81,9 @@
 (use-package typescript-mode
 :ensure t)
 
+(use-package svelte-mode
+:ensure t)
+
 (use-package js2-mode
 :ensure t)
 
@@ -98,7 +101,8 @@
 	("\\.jsx\\'" . web-mode)
 	("\\.ts\\'" . web-mode)
 	("\\.tsx\\'" . web-mode)
-	("\\.html\\'" . web-mode))
+	("\\.html\\'" . web-mode)
+	("\\.svelte\\'" . web-mode))
     :commands web-mode)
 
 (use-package lsp-mode
@@ -152,4 +156,5 @@
 (load-theme 'tango-dark)
 (set-face-attribute 'default nil :family "Fira Code")
 (set-face-attribute 'default nil :height 160)
+(setq indent-tabs-mode nil)
 #+END_SRC
