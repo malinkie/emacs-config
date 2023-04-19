@@ -9,7 +9,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes (quote(tango-dark)))
+ ;;'(custom-enabled-themes (quote(dracula)))
  '(package-selected-packages
     (quote(go-mode atomic-chrome ag projectile org-projectile slack use-package magit company-web tide indium web-mode dockerfile-mode))))
 (custom-set-faces
@@ -27,6 +27,7 @@
 (setq tab-width 4)
 (setq indent-tabs-mode nil)
 (global-display-line-numbers-mode)
+(setq org-agenda-files (directory-files-recursively "~/orgs" "\\.org$"))
 
 
 #+END_SRC
@@ -93,6 +94,9 @@
 (use-package json-mode
     :ensure t)
 
+(use-package lsp-java
+:ensure t)
+
 (use-package web-mode
     :ensure t
     :mode (
@@ -112,7 +116,8 @@
     :hook (
         (web-mode . lsp-deferred)
 	(c-mode . lsp-deferred)
-	(c++-mode . lsp-deferred))
+	(c++-mode . lsp-deferred)
+	(java-mode . lsp-deferred))
     :bind (
         ("M-/" . lsp-find-references))
     :commands lsp-deferred)
@@ -122,12 +127,25 @@
 :commands lsp-ui-mode)
 
 #+END_SRC
+
+** Rest Client
+#+BEGIN_SRC emacs-lisp
+(use-package restclient
+    :ensure t
+    :mode (
+        ("\\.api\\'" . restclient-mode)))
+#+END_SRC
+
 * Org Projectile
 #+BEGIN_SRC emacs-lisp
 
 (org-babel-do-load-languages
   'org-babel-load-languages
-  '((js . t)))
+  '((js . t) 
+  (plantuml . t)))
+
+(setq org-plantuml-jar-path
+  (expand-file-name "~/libraries/plantuml-1.2023.0.jar"))
 
 (use-package org-projectile
   :bind (("C-c n p" . org-projectile-project-todo-completing-read)
@@ -153,8 +171,8 @@
 #+BEGIN_SRC emacs-lisp
 ;; formatting all views
 ;;(display-line-numbers relative)
-(load-theme 'tango-dark)
-(set-face-attribute 'default nil :family "Fira Code")
+(load-theme 'dracula t)
+;;(set-face-attribute 'default nil :family "Fira Code")
 (set-face-attribute 'default nil :height 160)
 (setq indent-tabs-mode nil)
 #+END_SRC
